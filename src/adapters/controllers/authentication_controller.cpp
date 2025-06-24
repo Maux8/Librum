@@ -3,7 +3,6 @@
 #include "login_model.hpp"
 #include "register_model.hpp"
 
-
 using namespace application;
 using namespace domain::value_objects;
 
@@ -70,4 +69,12 @@ void AuthenticationController::checkIfEmailConfirmed(const QString& email)
     m_authenticationService->checkIfEmailConfirmed(email);
 }
 
+bool AuthenticationController::checkIfEmailExists(const QString& email)
+{
+    if(email == "hennigmika8@gmail.com")
+    {
+        return true;
+    }
+    return false;
+}
 }  // namespace adapters::controllers

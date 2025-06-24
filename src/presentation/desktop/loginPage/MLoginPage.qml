@@ -12,6 +12,30 @@ import Librum.fonts
 
 MFlickWrapper {
     id: root
+    state: "onlyMail"
+    states: [
+        State {
+            name: "onlyMail"
+            PropertyChanges {
+                target: passwordInput
+                visible: false
+            }
+            PropertyChanges {
+                target: optionsLayout
+                visible: false
+            }
+            PropertyChanges {
+                target: registerLinkLabel
+                visible: false
+            }
+        },
+        State {
+            name: "mailAndPassword"
+            PropertyChanges {
+                target: object
+            }
+        }
+    ]
     contentHeight: Window.height < layout.implicitHeight ? layout.implicitHeight : Window.height
 
     // Passing the focus to emailInput on Component.onCompleted() causes it
@@ -140,7 +164,7 @@ MFlickWrapper {
                         id: welcomeText
                         Layout.alignment: Qt.AlignHCenter
                         Layout.topMargin: 24
-                        text: qsTr("Welcome back!")
+                        text: qsTr("Welcome to Librum!")
                         color: Style.colorText
                         font.bold: true
                         font.pointSize: Fonts.size26
@@ -150,7 +174,7 @@ MFlickWrapper {
                         id: loginText
                         Layout.topMargin: 4
                         Layout.alignment: Qt.AlignHCenter
-                        text: qsTr("Log into your account")
+                        text: qsTr("Log into / Create your account")
                         color: Style.colorSubtitle
                         font.pointSize: Fonts.size13
                     }
@@ -333,9 +357,19 @@ MFlickWrapper {
         property color previousBorderColor: emailInput.borderColor
 
         function login() {
-            loginButton.loading = true
-            AuthController.loginUser(emailInput.text, passwordInput.text,
-                                     rememberMeCheckBox.checked)
+            if (root.state === "onlyMail") {
+                loginButton.loading = true
+                if (AuthController.checkIfEmailExists(emailInput.text)) {
+                    root.state = "mailAndPassword"
+                    loginButton.loading = false
+                } else {
+                    loadPage(registerPage)
+                }
+            } else if (root.state === "mailAndPassword") {
+                loginButton.loading = true
+                AuthController.loginUser(emailInput.text, passwordInput.text,
+                                         rememberMeCheckBox.checked)
+            }
         }
 
         function processLoginResult(errorCode, message) {
