@@ -12,10 +12,10 @@ import Librum.fonts
 
 MFlickWrapper {
     id: root
-    state: "onlyMail"
+    state: "start"
     states: [
         State {
-            name: "onlyMail"
+            name: "start"
             PropertyChanges {
                 target: passwordInput
                 visible: false
@@ -25,18 +25,126 @@ MFlickWrapper {
                 visible: false
             }
             PropertyChanges {
+                target: accountStorageText
+                visible: false
+            }
+            PropertyChanges {
+                target: nameInput
+                visible: false
+            }
+            PropertyChanges {
+                target: rememberMeCheckBox
+                visible: false
+            }
+            PropertyChanges {
+                target: acceptPolicy
+                visible: false
+            }
+            PropertyChanges {
+                target: loginButton
+                visible: true
+            }
+            PropertyChanges {
+                target: registerButton
+                visible: false
+            }
+            PropertyChanges {
                 target: registerLinkLabel
+                visible: false
+            }
+            PropertyChanges {
+                target: loginRedirecitonLinkArea
                 visible: false
             }
         },
         State {
-            name: "mailAndPassword"
+            name: "login"
             PropertyChanges {
-                target: object
+                target: nameInput
+                visible: false
+            }
+            PropertyChanges {
+                target: passwordInput
+                visible: true
+            }
+            PropertyChanges {
+                target: optionsLayout
+                visible: true
+            }
+            PropertyChanges {
+                target: registerLinkLabel
+                visible: true
+            }
+            PropertyChanges {
+                target: loginText
+                visible: true
+            }
+            PropertyChanges {
+                target: accountStorageText
+                visible: false
+            }
+            PropertyChanges {
+                target: acceptPolicy
+                visible: false
+            }
+            PropertyChanges {
+                target: loginButton
+                visible: true
+            }
+            PropertyChanges {
+                target: registerButton
+                visible: false
+            }
+            PropertyChanges {
+                target: loginRedirecitonLinkArea
+                visible: false
+            }
+        },
+        State {
+            name: "register"
+            PropertyChanges {
+                target: nameInput
+                visible: true
+            }
+            PropertyChanges {
+                target: passwordInput
+                visible: true
+            }
+            PropertyChanges {
+                target: loginText
+                visible: false
+            }
+            PropertyChanges {
+                target: accountStorageText
+                visible: true
+            }
+            PropertyChanges {
+                target: optionsLayout
+                visible: false
+            }
+            PropertyChanges {
+                target: acceptPolicy
+                visible: true
+            }
+            PropertyChanges {
+                target: loginButton
+                visible: false
+            }
+            PropertyChanges {
+                target: registerButton
+                visible: true
+            }
+            PropertyChanges {
+                target: registerLinkLabel
+                visible: false
+            }
+            PropertyChanges {
+                target: loginRedirecitonLinkArea
+                visible: true
             }
         }
     ]
-    contentHeight: Window.height < layout.implicitHeight ? layout.implicitHeight : Window.height
+    contentHeight: Window.height < layout.implicitHe2ight ? layout.implicitHeight : Window.height
 
     // Passing the focus to emailInput on Component.onCompleted() causes it
     // to pass controll back to root for some reason, this fixes the focus problem.
@@ -72,6 +180,19 @@ MFlickWrapper {
         target: AuthController
         function onLoginFinished(errorCode, message) {
             internal.processLoginResult(errorCode, message)
+        }
+    }
+
+    Connections {
+        id: authenticationControllerConnections
+        target: AuthController
+
+        function onRegistrationFinished(errorCode, message) {
+            internal.proccessRegistrationResult(errorCode, message)
+        }
+
+        function onEmailConfirmationCheckFinished(confirmed) {
+            internal.processEmailConfirmationResult(confirmed)
         }
     }
 
@@ -171,10 +292,22 @@ MFlickWrapper {
                     }
 
                     Label {
+                        id: accountStorageText
+                        Layout.fillWidth: true
+                        Layout.topMargin: 8
+                        Layout.alignment: Qt.AlignHCenter
+                        horizontalAlignment: Text.AlignHCenter
+                        text: qsTr("Your credentials are only used to authenticate yourself. Everything will be stored in a secure database.")
+                        font.pointSize: Fonts.size13
+                        color: Style.colorSubtitle
+                        wrapMode: Text.WordWrap
+                    }
+
+                    Label {
                         id: loginText
                         Layout.topMargin: 4
                         Layout.alignment: Qt.AlignHCenter
-                        text: qsTr("Log into / Create your account")
+                        text: qsTr("Just enter your email ^^")
                         color: Style.colorSubtitle
                         font.pointSize: Fonts.size13
                     }
@@ -194,6 +327,19 @@ MFlickWrapper {
                                                 passwordInput.giveFocus()
                                             }
                                         }
+                    }
+
+                    MLabeledInputBox {
+                        id: nameInput
+                        Layout.fillWidth: true
+                        Layout.topMargin: 22
+                        headerText: qsTr("Name")
+                        placeholderContent: "Kai Doe"
+                        placeholderColor: Style.colorPlaceholderText
+
+                        onEdited: internal.clearLoginError()
+                        Keys.onPressed: event => internal.moveFocusToNextInput(
+                                            event, null, emailInput)
                     }
 
                     MLabeledInputBox {
@@ -222,6 +368,14 @@ MFlickWrapper {
                         color: Style.colorErrorText
                     }
 
+                    MAcceptPolicy {
+                        id: acceptPolicy
+                        Layout.fillWidth: true
+                        Layout.topMargin: 24
+
+                        onKeyUp: passwordInput.giveFocus()
+                        onKeyDown: registerButton.giveFocus()
+                    }
                     RowLayout {
                         id: optionsLayout
                         Layout.preferredWidth: parent.width
@@ -313,6 +467,31 @@ MFlickWrapper {
                                             internal.login()
                                         }
                     }
+
+                    MButton {
+                        id: registerButton
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 40
+                        Layout.topMargin: 46
+                        borderWidth: 0
+                        backgroundColor: Style.colorBasePurple
+                        fontSize: Fonts.size12
+                        opacityOnPressed: 0.85
+                        textColor: Style.colorFocusedButtonText
+                        fontWeight: Font.Bold
+                        text: qsTr("Let's start")
+
+                        onClicked: internal.login()
+                        onFocusChanged: {
+                            if (focus)
+                                opacity = opacityOnPressed
+                            else
+                                opacity = 1
+                        }
+
+                        Keys.onReturnPressed: internal.registerUser()
+                        Keys.onUpPressed: acceptPolicy.giveFocus()
+                    }
                 }
             }
 
@@ -320,17 +499,36 @@ MFlickWrapper {
                 id: registerLinkLabel
                 Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 14
-                text: qsTr("Don't have an account? Register")
+                text: qsTr("Dou you want to create a new accoutn? Register")
                 font.pointSize: Fonts.size10dot5
                 opacity: registerLinkArea.pressed ? 0.8 : 1
                 color: Style.colorBasePurple
+                visible: false
 
                 MouseArea {
                     id: registerLinkArea
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
 
-                    onClicked: loadPage(registerPage)
+                    onClicked: root.state = "register"
+                }
+            }
+
+            Label {
+                id: loginRedirectionLabel
+                Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: 14
+                text: qsTr("Already have an account with another Email? Login")
+                font.pointSize: Fonts.size10dot5
+                opacity: loginRedirecitonLinkArea.pressed ? 0.8 : 1
+                color: Style.colorBasePurple
+
+                MouseArea {
+                    id: loginRedirecitonLinkArea
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+
+                    onClicked: root.state = "login"
                 }
             }
         }
@@ -357,18 +555,25 @@ MFlickWrapper {
         property color previousBorderColor: emailInput.borderColor
 
         function login() {
-            if (root.state === "onlyMail") {
+            if (root.state === "start") {
                 loginButton.loading = true
                 if (AuthController.checkIfEmailExists(emailInput.text)) {
-                    root.state = "mailAndPassword"
+                    root.state = "login"
                     loginButton.loading = false
                 } else {
-                    loadPage(registerPage)
+                    root.state = "register"
+                    loginButton.loading = false
                 }
-            } else if (root.state === "mailAndPassword") {
+            } else if (root.state === "login") {
                 loginButton.loading = true
                 AuthController.loginUser(emailInput.text, passwordInput.text,
                                          rememberMeCheckBox.checked)
+                // root.state == register when button is pressed
+            } else {
+                loginButton.loading = true
+                AuthController.registerUser(nameInput.text, emailInput.text,
+                                            passwordInput.text,
+                                            acceptPolicy.checked)
             }
         }
 
@@ -378,6 +583,17 @@ MFlickWrapper {
             } else if (errorCode !== ErrorCode.AutomaticLoginFailed) {
                 internal.setLoginError(errorCode, message)
                 loginButton.loading = false
+            }
+        }
+
+        function proccessRegistrationResult(errorCode, message) {
+            registerButton.loading = false
+
+            if (errorCode === ErrorCode.NoError) {
+                confirmEmailPopup.open()
+                confirmEmailPopup.giveFocus()
+            } else {
+                internal.setRegistrationErrors(errorCode, message)
             }
         }
 
@@ -409,6 +625,39 @@ MFlickWrapper {
             }
         }
 
+        function setRegistrationErrors(errorCode, message) {
+            switch (errorCode) {
+            case ErrorCode.UserWithEmailAlreadyExists:
+                // Fall through
+            case ErrorCode.InvalidEmailAddressFormat:
+                // Fall through
+            case ErrorCode.EmailAddressTooShort:
+                // Fall through
+            case ErrorCode.EmailAddressTooLong:
+                // Fall through
+                emailInput.errorText = message
+                emailInput.setError()
+                break
+            case ErrorCode.PasswordTooShort:
+                // Fall through
+            case ErrorCode.PasswordTooLong:
+                passwordInput.errorText = message
+                passwordInput.setError()
+                break
+            case ErrorCode.NameTooShort:
+                nameInput.errorText = message
+                nameInput.setError()
+                break
+            case ErrorCode.NameTooLong:
+                nameInput.errorText = message
+                nameInput.setError()
+                break
+            default:
+                generalErrorText.text = message
+                generalErrorText.visible = true
+            }
+        }
+
         function clearLoginError() {
             emailInput.errorText = ""
             emailInput.clearError()
@@ -417,6 +666,14 @@ MFlickWrapper {
 
             generalErrorText.visible = false
             generalErrorText.text = ""
+        }
+
+        function policyIsAccepted() {
+            if (acceptPolicy.activated)
+                return true
+
+            acceptPolicy.setError()
+            return false
         }
     }
 }

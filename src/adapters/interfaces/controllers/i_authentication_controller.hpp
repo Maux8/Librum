@@ -29,6 +29,7 @@ public:
                                           QString password,
                                           bool keepUpdated) = 0;
     Q_INVOKABLE virtual void checkIfEmailConfirmed(const QString& email) = 0;
+    Q_INVOKABLE virtual bool checkIfEmailExists(const QString& email) = 0;
 
 signals:
     void loginFinished(int errorCode, const QString& message);

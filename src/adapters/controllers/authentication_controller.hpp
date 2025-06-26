@@ -23,7 +23,7 @@ public:
     void registerUser(const QString& name, const QString& email,
                       QString password, bool keepUpdated) override;
     void checkIfEmailConfirmed(const QString& email) override;
-    bool checkIfEmailExists(const QString& email);
+    bool checkIfEmailExists(const QString& email) override;
 
 private:
     application::IAuthenticationService* m_authenticationService;

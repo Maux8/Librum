@@ -119,5 +119,6 @@
         <file>toolsPage/MPdfToImagePopup.qml</file>
         <file>modules/CustomComponents/MFeedbackPopup.qml</file>
         <file>readingPage/MTranslationPopup.qml</file>
+        <file>loginPage/MAcceptPolicy.qml</file>
     </qresource>
 </RCC>
