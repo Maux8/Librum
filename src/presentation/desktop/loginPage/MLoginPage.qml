@@ -13,137 +13,6 @@ import Librum.fonts
 MFlickWrapper {
     id: root
     state: "start"
-    states: [
-        State {
-            name: "start"
-            PropertyChanges {
-                target: passwordInput
-                visible: false
-            }
-            PropertyChanges {
-                target: optionsLayout
-                visible: false
-            }
-            PropertyChanges {
-                target: accountStorageText
-                visible: false
-            }
-            PropertyChanges {
-                target: nameInput
-                visible: false
-            }
-            PropertyChanges {
-                target: rememberMeCheckBox
-                visible: false
-            }
-            PropertyChanges {
-                target: acceptPolicy
-                visible: false
-            }
-            PropertyChanges {
-                target: loginButton
-                visible: true
-            }
-            PropertyChanges {
-                target: registerButton
-                visible: false
-            }
-            PropertyChanges {
-                target: registerLinkLabel
-                visible: false
-            }
-            PropertyChanges {
-                target: loginRedirecitonLinkArea
-                visible: false
-            }
-        },
-        State {
-            name: "login"
-            PropertyChanges {
-                target: nameInput
-                visible: false
-            }
-            PropertyChanges {
-                target: passwordInput
-                visible: true
-            }
-            PropertyChanges {
-                target: optionsLayout
-                visible: true
-            }
-            PropertyChanges {
-                target: registerLinkLabel
-                visible: true
-            }
-            PropertyChanges {
-                target: loginText
-                visible: true
-            }
-            PropertyChanges {
-                target: accountStorageText
-                visible: false
-            }
-            PropertyChanges {
-                target: acceptPolicy
-                visible: false
-            }
-            PropertyChanges {
-                target: loginButton
-                visible: true
-            }
-            PropertyChanges {
-                target: registerButton
-                visible: false
-            }
-            PropertyChanges {
-                target: loginRedirecitonLinkArea
-                visible: false
-            }
-        },
-        State {
-            name: "register"
-            PropertyChanges {
-                target: nameInput
-                visible: true
-            }
-            PropertyChanges {
-                target: passwordInput
-                visible: true
-            }
-            PropertyChanges {
-                target: loginText
-                visible: false
-            }
-            PropertyChanges {
-                target: accountStorageText
-                visible: true
-            }
-            PropertyChanges {
-                target: optionsLayout
-                visible: false
-            }
-            PropertyChanges {
-                target: acceptPolicy
-                visible: true
-            }
-            PropertyChanges {
-                target: loginButton
-                visible: false
-            }
-            PropertyChanges {
-                target: registerButton
-                visible: true
-            }
-            PropertyChanges {
-                target: registerLinkLabel
-                visible: false
-            }
-            PropertyChanges {
-                target: loginRedirecitonLinkArea
-                visible: true
-            }
-        }
-    ]
     contentHeight: Window.height < layout.implicitHe2ight ? layout.implicitHeight : Window.height
 
     // Passing the focus to emailInput on Component.onCompleted() causes it
@@ -301,6 +170,7 @@ MFlickWrapper {
                         font.pointSize: Fonts.size13
                         color: Style.colorSubtitle
                         wrapMode: Text.WordWrap
+                        visible: visibilityMap.isVisible(accountStorageText)
                     }
 
                     Label {
@@ -310,6 +180,7 @@ MFlickWrapper {
                         text: qsTr("Just enter your email ^^")
                         color: Style.colorSubtitle
                         font.pointSize: Fonts.size13
+                        visible: visibilityMap.isVisible(loginText)
                     }
 
                     MLabeledInputBox {
@@ -336,6 +207,7 @@ MFlickWrapper {
                         headerText: qsTr("Name")
                         placeholderContent: "Kai Doe"
                         placeholderColor: Style.colorPlaceholderText
+                        visible: visibilityMap.isVisible(nameInput)
 
                         onEdited: internal.clearLoginError()
                         Keys.onPressed: event => internal.moveFocusToNextInput(
@@ -349,6 +221,7 @@ MFlickWrapper {
                         headerText: qsTr("Password")
                         image: Icons.eyeOn
                         toggledImage: Icons.eyeOff
+                        visible: visibilityMap.isVisible(passwordInput)
 
                         onEdited: internal.clearLoginError()
                         Keys.onPressed: event => {
@@ -372,6 +245,7 @@ MFlickWrapper {
                         id: acceptPolicy
                         Layout.fillWidth: true
                         Layout.topMargin: 24
+                        visible: visibilityMap.isVisible(acceptPolicy)
 
                         onKeyUp: passwordInput.giveFocus()
                         onKeyDown: registerButton.giveFocus()
@@ -381,6 +255,7 @@ MFlickWrapper {
                         Layout.preferredWidth: parent.width
                         Layout.fillWidth: true
                         Layout.topMargin: 24
+                        visible: visibilityMap.isVisible(optionsLayout)
 
                         MCheckBox {
                             id: rememberMeCheckBox
@@ -450,6 +325,7 @@ MFlickWrapper {
                         textColor: Style.colorFocusedButtonText
                         fontWeight: Font.Bold
                         text: qsTr("Login")
+                        visible: visibilityMap.isVisible(loginButton)
 
                         onClicked: internal.login()
 
@@ -480,6 +356,7 @@ MFlickWrapper {
                         textColor: Style.colorFocusedButtonText
                         fontWeight: Font.Bold
                         text: qsTr("Let's start")
+                        visible: visibilityMap.isVisible(registerButton)
 
                         onClicked: internal.login()
                         onFocusChanged: {
@@ -495,6 +372,7 @@ MFlickWrapper {
                 }
             }
 
+            // not used right now
             Label {
                 id: registerLinkLabel
                 Layout.alignment: Qt.AlignHCenter
@@ -503,7 +381,7 @@ MFlickWrapper {
                 font.pointSize: Fonts.size10dot5
                 opacity: registerLinkArea.pressed ? 0.8 : 1
                 color: Style.colorBasePurple
-                visible: false
+                visible: visibilityMap.isVisible(registerLinkLabel)
 
                 MouseArea {
                     id: registerLinkArea
@@ -522,6 +400,7 @@ MFlickWrapper {
                 font.pointSize: Fonts.size10dot5
                 opacity: loginRedirecitonLinkArea.pressed ? 0.8 : 1
                 color: Style.colorBasePurple
+                visible: visibilityMap.isVisible(loginRedirectionLabel)
 
                 MouseArea {
                     id: loginRedirecitonLinkArea
@@ -669,11 +548,26 @@ MFlickWrapper {
         }
 
         function policyIsAccepted() {
-            if (acceptPolicy.activated)
+            if (acceptPolicy.activdated)
                 return true
 
             acceptPolicy.setError()
             return false
+        }
+    }
+
+    QtObject {
+        id: visibilityMap
+
+        // Map: State-Name → Array von Komponenten, die sichtbar sind
+        property var visibilityByState: ({
+                                             "start": [loginButton],
+                                             "login": [passwordInput, optionsLayout, registerLinkLabel, loginText, loginButton],
+                                             "register": [nameInput, passwordInput, accountStorageText, acceptPolicy, registerButton, loginRedirectionLabel]
+                                         })
+
+        function isVisible(component) {
+            return visibilityByState[root.state]?.includes(component) ?? false
         }
     }
 }
